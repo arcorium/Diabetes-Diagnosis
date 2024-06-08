@@ -18,6 +18,8 @@ namespace ar
   MainWindow::MainWindow(const QString& host, QWidget* parent)
     : QMainWindow(parent), wait_reply_{false}, socket_{new QLocalSocket{this}}
   {
+    // setWindowFlags(Qt::FramelessWindowHint);
+
     ui_.setupUi(this);
 
     QStringList header_labels = {
@@ -353,6 +355,14 @@ namespace ar
   void MainWindow::on_error_data(const QLocalSocket::LocalSocketError& err) noexcept
   {
     std::cout << err << std::endl;
+    if (err == QLocalSocket::LocalSocketError::ServerNotFoundError || err ==
+      QLocalSocket::ConnectionRefusedError)
+    {
+      QMessageBox::critical(this, "Failed to Connect to Server",
+                            "Please execute python file first, and try open the application again");
+      // QApplication::exit(); // IDK how this doesn't works
+      exit(0);
+    }
   }
 
   void MainWindow::on_start_diagnosis() noexcept
