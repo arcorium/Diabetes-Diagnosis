@@ -12,16 +12,13 @@ int main(int argc, char* argv[])
 {
   using namespace Qt::Literals;
 
-  QApplication a(argc, argv);
-  // QApplication::setStyle("Fusion");
+  QApplication app(argc, argv);
+  app.setStyle("fusion");
 
   ar::MainWindow main_window{"/tmp/cbr_socket.s"};
   ar::Opening opening{main_window};
 
-  // Create connection
-
-
   opening.show();
 
-  return QApplication::exec();
+  return app.exec();
 }

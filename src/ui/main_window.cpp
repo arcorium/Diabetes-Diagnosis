@@ -1,5 +1,7 @@
 #include "main_window.h"
 
+#include <QMessageBox>
+
 #include <iostream>
 #include <ranges>
 
@@ -11,6 +13,8 @@
 
 namespace ar
 {
+  using namespace Qt::StringLiterals;
+
   MainWindow::MainWindow(const QString& host, QWidget* parent)
     : QMainWindow(parent), wait_reply_{false}, socket_{new QLocalSocket{this}}
   {
@@ -33,6 +37,7 @@ namespace ar
     ui_.spinbox_pregnancies->setDisabled(true);
     ui_.spinbox_pregnancies->setMinimum(0);
     ui_.spinbox_pregnancies->setMaximum(24);
+    ui_.checkbox_pregnant->setDisabled(ui_.combobox_gender->currentIndex() == 0);
     ui_.dspinbox_weight->setMaximum(std::numeric_limits<double>::max());
     ui_.spinbox_height->setMaximum(std::numeric_limits<int>::max());
 
@@ -103,6 +108,11 @@ namespace ar
 
     // Clear button
     connect(ui_.btn_clear, &QPushButton::clicked, this, &MainWindow::clear_forms);
+
+    // Gender
+    connect(ui_.combobox_gender, &QComboBox::currentIndexChanged, this, [&](int index) {
+      ui_.checkbox_pregnant->setDisabled(index == 0);
+    });
   }
 
   void MainWindow::clear_forms() noexcept
@@ -347,6 +357,22 @@ namespace ar
 
   void MainWindow::on_start_diagnosis() noexcept
   {
+    // Check field
+    if (ui_.line_name->text().isEmpty()
+      || ui_.line_address->text().isEmpty()
+      || ui_.spinbox_age->value() == 0
+      || ui_.dspinbox_bmi->value() == 0.0
+      || ui_.dspinbox_weight->value() == 0.0
+      || ui_.spinbox_height->value() == 0
+      || ui_.dspinbox_dpf->value() == 0.0)
+    {
+      QMessageBox msg_box{};
+      msg_box.setWindowTitle(u"Diagnosis Failed"_s);
+      msg_box.setText(u"Failed to start diagnosis due to some fields are empty"_s);
+      msg_box.exec();
+      return;
+    }
+
     // Send data to server
     if (wait_reply_)
       return;
