@@ -29,10 +29,12 @@ def deserialize_diagnose(payload: bytes):
 
 
 def serialize_diagnose_response(predict: bool, index: int, similarity: float) -> bytes:
-  pred_byte = predict.to_bytes(1, 'little')
-  index_byte = index.to_bytes(4, "little")
-  sim_byte = struct.pack('f', similarity)
-  return b''.join([pred_byte, index_byte, sim_byte])
+  # Pre-allocate bytearray for better performance (1+4+4 = 9 bytes)
+  result = bytearray(9)
+  result[0:1] = int(predict).to_bytes(1, 'little')
+  result[1:5] = index.to_bytes(4, "little")
+  result[5:9] = struct.pack('f', similarity)
+  return bytes(result)
 
 
 def serialize_data() -> [bytes]:
