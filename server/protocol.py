@@ -20,10 +20,10 @@ def deserialize_diagnose(payload: bytes):
   glucose = int.from_bytes(payload[1:3], "little")
   blood_pressure = payload[3]
   skin_thickness = payload[4]
-  insulin = payload[5]
-  bmi = struct.unpack('f', payload[6:10])[0]
-  dpf = struct.unpack('f', payload[10:14])[0]
-  age = payload[14]
+  insulin = int.from_bytes(payload[5:7], "little")  # Fixed: insulin is 2 bytes (values up to 846)
+  bmi = struct.unpack('f', payload[7:11])[0]  # Adjusted offset
+  dpf = struct.unpack('f', payload[11:15])[0]  # Adjusted offset
+  age = payload[15]  # Adjusted offset
 
   return (pregnancies, glucose, blood_pressure, skin_thickness, insulin, bmi, dpf, age)
 
